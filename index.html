@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a9acf">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Water Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231a9acf'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E💧%3C/text%3E%3C/svg%3E">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(145deg, #e8f4f8 0%, #d4edf5 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 32px;
+      padding: 32px 28px 28px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 120, 180, 0.15);
+      text-align: center;
+    }
+
+    .clock {
+      font-size: 42px;
+      font-weight: 700;
+      color: #1a3a4a;
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 4px;
+    }
+
+    .clock-label {
+      font-size: 12px;
+      color: #8aabb8;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      color: #1a3a4a;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #6b8a9a;
+      margin-bottom: 20px;
+    }
+
+    .progress-section {
+      background: #f0f7fa;
+      border-radius: 20px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .progress-numbers {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .progress-numbers .drank {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1a7a9a;
+    }
+
+    .progress-numbers .drank span { font-size: 16px; font-weight: 400; color: #6b8a9a; }
+
+    .progress-numbers .target {
+      font-size: 14px;
+      color: #6b8a9a;
+    }
+
+    .progress-bar-bg {
+      height: 10px;
+      background: #dce8ed;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4fc3f7, #1a9acf);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .glasses-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .glass {
+      aspect-ratio: 3 / 4;
+      background: #f0f7fa;
+      border: 2px solid #d0dfe6;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      padding: 6px;
+    }
+
+    .glass:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,120,180,0.12); }
+
+    .glass.filled {
+      background: linear-gradient(180deg, #e1f5fe 0%, #4fc3f7 100%);
+      border-color: #4fc3f7;
+      box-shadow: 0 4px 15px rgba(79, 195, 247, 0.25);
+    }
+
+    .glass .icon { font-size: 22px; line-height: 1; margin-bottom: 3px; }
+    .glass .label { font-size: 11px; font-weight: 600; color: #4a6a7a; }
+    .glass.filled .label { color: #1a3a4a; }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #1a9acf;
+      color: white;
+    }
+
+    .btn-primary:hover { background: #1585b5; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: #eef3f6;
+      color: #4a6a7a;
+    }
+
+    .btn-secondary:hover { background: #e2e9ee; }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .btn-danger:hover { background: #fecaca; }
+
+    .bot-box {
+      background: #f8faff;
+      border: 2px solid #e0e8f0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .bot-box.insult {
+      background: #fff8f8;
+      border-color: #fca5a5;
+    }
+
+    .bot-box.celebrate {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .bot-avatar {
+      font-size: 36px;
+      flex-shrink: 0;
+      width: 48px;
+      text-align: center;
+      animation: none;
+    }
+
+    .bot-box.insult .bot-avatar {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    .bot-box.celebrate .bot-avatar {
+      animation: bounce 0.5s ease-in-out;
+    }
+
+    .bot-text {
+      font-size: 14px;
+      color: #2a4a5a;
+      line-height: 1.4;
+    }
+
+    .bot-text .small {
+      font-size: 11px;
+      color: #8aabb8;
+      display: block;
+      margin-top: 4px;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+      60% { transform: translateY(-3px); }
+    }
+
+    .reminder-section {
+      margin-bottom: 12px;
+    }
+
+    .reminder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .reminder-header label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a6a7a;
+    }
+
+    .reminder-toggle {
+      font-size: 13px;
+      color: #6b8a9a;
+    }
+
+    .reminder-toggle.on { color: #1a9acf; font-weight: 600; }
+
+    .reminder-times {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .reminder-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f0f7fa;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #2a4a5a;
+    }
+
+    .reminder-chip .remove {
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      color: #8aabb8;
+      transition: color 0.2s;
+    }
+
+    .reminder-chip .remove:hover { color: #b91c1c; }
+
+    .reminder-add-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .reminder-add-row input[type="time"] {
+      flex: 1;
+      padding: 8px 10px;
+      border: 2px solid #d0dfe6;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .reminder-add-row input[type="time"]:focus { border-color: #4fc3f7; }
+
+    .reminder-add-row .btn-small {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 10px;
+      background: #1a9acf;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .reminder-add-row .btn-small:hover { background: #1585b5; }
+
+    .footer {
+      font-size: 11px;
+      color: #a0b8c4;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="clock" id="clockDisplay">00:00:00</div>
+  <div class="clock-label">YOUR LOCAL TIME</div>
+
+  <h1>Water Tracker</h1>
+  <p class="subtitle">8 glasses · 250ml each · 2000ml total</p>
+
+  <div class="progress-section">
+    <div class="progress-numbers">
+      <div class="drank" id="drankDisplay">0 <span>ml</span></div>
+      <div class="target" id="remainingDisplay">Goal: 2000 ml</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="glasses-grid" id="glassesGrid"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="drinkBtn">+ Drink 250ml</button>
+    <button class="btn btn-danger" id="resetBtn">Reset</button>
+  </div>
+
+  <div class="bot-box" id="botBox">
+    <div class="bot-avatar" id="botAvatar">🤖</div>
+    <div class="bot-text" id="botText">
+      Hi! I'm your water buddy. Click a glass or press "+ Drink" to start!
+      <span class="small">I'll remind you to drink and keep you company</span>
+    </div>
+  </div>
+
+  <div class="reminder-section">
+    <div class="reminder-header">
+      <label>⏰ Reminder Times</label>
+      <span class="reminder-toggle" id="reminderToggle">🔔 OFF</span>
+    </div>
+
+    <div class="reminder-times" id="reminderTimesList"></div>
+
+    <div class="reminder-add-row">
+      <input type="time" id="newReminderTime" value="12:00">
+      <button class="btn-small" id="addReminderBtn">+ Add</button>
+    </div>
+  </div>
+
+  <div class="footer" id="footerInfo"></div>
+</div>
+
+<script>
+  const GLASS_SIZE = 250;
+  const TOTAL_GLASSES = 8;
+  const TOTAL_ML = GLASS_SIZE * TOTAL_GLASSES;
+  const STORAGE_KEY = 'water_tracker';
+
+  let state = loadState();
+  let lastDrinkTime = state.lastDrinkTime || null;
+  let lastDrinkTimestamps = [];
+  let botMood = 'neutral';
+  let insultTimer = null;
+
+  const friendlyMessages = [
+    "Nice, steady sip! That's the way! {emoji}",
+    "One glass at a time.慢慢来. {emoji}",
+    "Good pace! Spread 'em out through the day {emoji}",
+    "Your kidneys approve of this pace. {emoji}",
+    "Slow and steady wins the hydration race! {emoji}",
+    "Perfect. Not too fast, not too slow. {emoji}"
+  ];
+
+  const rapidDrinkMessages = [
+    "Woah slow down! You're not a camel storing for winter! 🐪",
+    "Chugging 5 glasses at once isn't hydration, it's a flood. 🌊",
+    "Easy there! Unless you're part fish, pace yourself. 🐟",
+    "You know water poisoning is a thing, right? Chill. 🧊",
+    "Bro are you even drinking these or just clicking? 🫤",
+    "That much water at once? Your bladder hates you right now. 🚽",
+    "At this rate you'll be a water balloon by noon. 🎈",
+    "I admire the enthusiasm but your stomach doesn't. 🤨"
+  ];
+
+  const encourageMessages = [
+    "Psst... your water is waiting for you 🥛",
+    "Your cells are thirsty! 🧬",
+    "Don't forget to hydrate! ⭐",
+    "Water you waiting for? 😄",
+    "Just one glass. You can do it! 💪",
+    "Time to give your body what it deserves 💧",
+    "One glass now, you'll thank me later. Trust me."
+  ];
+
+  const insultMessages = [
+    "Oi! You're turning into a dried-up raisin! 🥀",
+    "Are you a cactus now? Drink something! 🌵",
+    "Your brain is running on fumes. DRINK. WATER. 🧠",
+    "I've seen better hydration in a desert. 🏜️",
+    "You're literally withering away as I speak... 💀",
+    "Congratulations, you're now 15% dust. 🫥",
+    "Even my plants drink more water than you. 🌱",
+    "Are you TRYING to become a mummy? 🧟",
+    "Your pee is probably the color of maple syrup right now. 🍁",
+    "If you were a phone, you'd be at 1% battery. PLUG IN. 🔋"
+  ];
+
+  const goalMessages = [
+    "8 glasses huh? Sure, Jan. 🙄",
+    "Uh huh, 2000ml. Totally believable. 🤨",
+    "I'm just gonna pretend I believe you hit your goal. Sure. 👍",
+    "Look at Mr/Mrs 'I drink all my water' over here. 🏆 (skeptical)",
+    "If you actually drank all that, congrats. If you're lying, I know. 😏"
+  ];
+
+  function getDefaultState() {
+    return { glasses: 0, date: today(), reminderTimes: ["12:00", "15:00", "18:00"] };
+  }
+
+  function today() {
+    return new Date().toDateString();
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.date === today()) return s;
+      }
+    } catch (_) {}
+    return getDefaultState();
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function now() {
+    return new Date();
+  }
+
+  function formatTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  }
+
+  function formatTimeShort(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  function getCurrentTimeStr() {
+    return formatTimeShort(now());
+  }
+
+  function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function render() {
+    const d = now();
+    document.getElementById('clockDisplay').textContent = formatTime(d);
+
+    const filled = state.glasses;
+    const ml = filled * GLASS_SIZE;
+    const left = TOTAL_ML - ml;
+    const pct = Math.min(100, (ml / TOTAL_ML) * 100);
+
+    document.getElementById('drankDisplay').innerHTML = `${ml} <span>ml</span>`;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('remainingDisplay').textContent = left > 0 ? `Left: ${left}ml` : 'Goal Complete! 🎉';
+
+    const grid = document.getElementById('glassesGrid');
+    grid.innerHTML = '';
+    for (let i = 0; i < TOTAL_GLASSES; i++) {
+      const glass = document.createElement('div');
+      glass.className = 'glass' + (i < filled ? ' filled' : '');
+      glass.innerHTML = `<div class="icon">${i < filled ? '💧' : '🥛'}</div><div class="label">${i < filled ? 'Drank' : '250ml'}</div>`;
+      glass.addEventListener('click', () => {
+        const target = i + 1;
+        const prev = state.glasses;
+        state.glasses = Math.min(TOTAL_GLASSES, target);
+        const nowTime = Date.now();
+        lastDrinkTime = nowTime;
+        state.lastDrinkTime = nowTime;
+        const mood = getDrinkMood(prev, state.glasses, nowTime);
+        saveState();
+        render();
+        if (state.glasses === TOTAL_GLASSES && prev < TOTAL_GLASSES) {
+          celebrate();
+        } else if (state.glasses > prev) {
+          setBotMood(mood);
+        } else if (state.glasses < prev) {
+          setBotMood('neutral', "Undo! No worries, every drop counts. Drink when you're ready! 💧");
+        }
+      });
+      grid.appendChild(glass);
+    }
+
+    renderReminderTimes();
+
+    const toggle = document.getElementById('reminderToggle');
+    if (state.reminderEnabled && 'Notification' in window && Notification.permission === 'granted') {
+      toggle.textContent = '🔔 ON';
+      toggle.className = 'reminder-toggle on';
+    } else {
+      toggle.textContent = '🔔 OFF';
+      toggle.className = 'reminder-toggle';
+    }
+
+    const footer = document.getElementById('footerInfo');
+    if (ml > 0) {
+      footer.textContent = `Last drink: ${new Date(lastDrinkTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ${filled}/${TOTAL_GLASSES} glasses`;
+    } else {
+      footer.textContent = 'No drinks yet today. Get started! 💧';
+    }
+
+    updateInsultCheck();
+  }
+
+  function renderReminderTimes() {
+    const list = document.getElementById('reminderTimesList');
+    list.innerHTML = '';
+    const times = state.reminderTimes || [];
+    if (times.length === 0) {
+      list.innerHTML = '<span style="font-size:13px;color:#a0b8c4;">No reminders set. Add one above!</span>';
+      return;
+    }
+    times.sort();
+    times.forEach((t, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'reminder-chip';
+      chip.innerHTML = `⏰ ${t} <span class="remove" data-idx="${idx}">✕</span>`;
+      chip.querySelector('.remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeReminderTime(idx);
+      });
+      list.appendChild(chip);
+    });
+  }
+
+  function removeReminderTime(idx) {
+    state.reminderTimes.splice(idx, 1);
+    saveState();
+    render();
+  }
+
+  document.getElementById('addReminderBtn').addEventListener('click', () => {
+    const input = document.getElementById('newReminderTime');
+    const val = input.value;
+    if (!val) return;
+    if (!state.reminderTimes) state.reminderTimes = [];
+    if (state.reminderTimes.includes(val)) {
+      setBotMood('neutral', 'That time is already set!');
+      return;
+    }
+    state.reminderTimes.push(val);
+    state.reminderTimes.sort();
+    saveState();
+    render();
+    setBotMood('neutral', `Reminder added for ${val}! I'll bug you then 😄`);
+  });
+
+  document.getElementById('drinkBtn').addEventListener('click', drinkWater);
+  document.getElementById('resetBtn').addEventListener('click', resetToday);
+
+  document.getElementById('reminderToggle').addEventListener('click', () => {
+    if (!state.reminderEnabled) {
+      enableNotifications();
+    } else {
+      state.reminderEnabled = false;
+      saveState();
+      render();
+      setBotMood('neutral', "Reminders off. But I'll still be watching you... 👀");
+    }
+  });
+
+  function getDrinkMood(prev, current, timestamp) {
+    const jump = current - prev;
+    if (jump > 2) return 'rapid';
+    lastDrinkTimestamps.push(timestamp);
+    lastDrinkTimestamps = lastDrinkTimestamps.filter(t => t > Date.now() - 300000);
+    if (lastDrinkTimestamps.length > 2) return 'rapid';
+    return 'happy';
+  }
+
+  function setBotMood(mood, customMessage) {
+    const box = document.getElementById('botBox');
+    const avatar = document.getElementById('botAvatar');
+    const text = document.getElementById('botText');
+
+    box.className = 'bot-box';
+    if (mood === 'happy') box.classList.add('celebrate');
+    else if (mood === 'insult') box.classList.add('insult');
+    else if (mood === 'rapid') box.classList.add('insult');
+    else if (mood === 'celebrate') box.classList.add('celebrate');
+
+    let message = customMessage || '';
+    let emoji = '🤖';
+    let small = '';
+
+    switch (mood) {
+      case 'happy':
+        emoji = '😊';
+        message = message || pickRandom(friendlyMessages).replace('{emoji}', pickRandom(['💧', '💪', '🔥', '🙌', '✨']));
+        small = 'Keep it going!';
+        break;
+      case 'encourage':
+        emoji = '🤖';
+        message = message || pickRandom(encourageMessages);
+        small = `You've had ${state.glasses * GLASS_SIZE}ml so far`;
+        break;
+      case 'insult': {
+        emoji = '😤';
+        message = message || pickRandom(insultMessages);
+        const elapsed = lastDrinkTime ? Math.floor((Date.now() - lastDrinkTime) / 60000) : 0;
+        const hrs = Math.floor(elapsed / 60);
+        const mins = elapsed % 60;
+        small = `Last drink: ${hrs > 0 ? hrs + 'h ' : ''}${mins}m ago`;
+        break;
+      }
+      case 'rapid': {
+        emoji = '🤨';
+        message = message || pickRandom(rapidDrinkMessages);
+        const drank = state.glasses * GLASS_SIZE;
+        small = `You've logged ${drank}ml. Sure you drank all that?`;
+        break;
+      }
+      case 'celebrate':
+        emoji = '😏';
+        message = message || pickRandom(goalMessages);
+        small = '8 glasses. Riiiiight.';
+        break;
+      default:
+        emoji = '🤖';
+        message = message || "Hi! I'm your water buddy. Click a glass or press '+ Drink' to start!";
+        small = "I'll remind you to drink and keep you company";
+    }
+
+    avatar.textContent = emoji;
+    text.innerHTML = message + ' <span class="small">' + small + '</span>';
+    botMood = mood;
+  }
+
+  function drinkWater() {
+    if (state.glasses >= TOTAL_GLASSES) {
+      setBotMood('celebrate', "You already hit your goal! Come back tomorrow!");
+      return;
+    }
+    const prev = state.glasses;
+    state.glasses++;
+    const nowTime = Date.now();
+    lastDrinkTime = nowTime;
+    state.lastDrinkTime = nowTime;
+    const mood = getDrinkMood(prev, state.glasses, nowTime);
+    saveState();
+    render();
+    if (state.glasses === TOTAL_GLASSES) {
+      celebrate();
+    } else {
+      setBotMood(mood);
+    }
+  }
+
+  function resetToday() {
+    if (state.glasses === 0) return;
+    if (!confirm('Reset all progress for today?')) return;
+    state = getDefaultState();
+    state.reminderTimes = state.reminderTimes || ["12:00", "15:00", "18:00"];
+    lastDrinkTime = null;
+    saveState();
+    render();
+    setBotMood('neutral', 'Reset done! Fresh start, let\'s go! 💪');
+  }
+
+  function celebrate() {
+    setBotMood('celebrate');
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Water Goal Complete! 🎉', { body: 'You drank 2000ml today! Amazing!' });
+    }
+  }
+
+  function enableNotifications() {
+    if (!('Notification' in window)) {
+      alert('Notifications not supported in this browser.');
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      alert('Notifications are blocked in your browser settings. Please enable them manually.');
+      return;
+    }
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        state.reminderEnabled = true;
+        saveState();
+        render();
+        setBotMood('neutral', 'Reminders ON! I will now annoy you until you drink. Lovely! 🎉');
+      }
+    });
+  }
+
+  function updateInsultCheck() {
+    if (!lastDrinkTime) {
+      const elapsed = (Date.now() - new Date().setHours(0,0,0,0));
+      const hoursSinceMidnight = elapsed / 3600000;
+      if (hoursSinceMidnight > 2 && state.glasses === 0 && botMood !== 'insult') {
+        setBotMood('insult');
+      }
+      return;
+    }
+
+    const elapsed = Date.now() - lastDrinkTime;
+    const minutesSinceDrink = Math.floor(elapsed / 60000);
+
+    if (state.glasses < TOTAL_GLASSES) {
+      if (minutesSinceDrink > 120 && botMood !== 'insult') {
+        setBotMood('insult');
+      } else if (minutesSinceDrink > 60 && botMood !== 'insult' && botMood !== 'encourage') {
+        setBotMood('encourage');
+      }
+    }
+  }
+
+  function checkScheduledReminders() {
+    const current = getCurrentTimeStr();
+    const times = state.reminderTimes || [];
+    if (!state.reminderEnabled || times.length === 0) return;
+
+    const lastFired = state._lastFiredTimes || [];
+    times.forEach(time => {
+      if (current === time && !lastFired.includes(time)) {
+        if (state.glasses < TOTAL_GLASSES) {
+          if (!lastFired) state._lastFiredTimes = [];
+          state._lastFiredTimes.push(time);
+          if (state._lastFiredTimes.length > 20) state._lastFiredTimes.shift();
+          saveState();
+
+          const left = TOTAL_ML - (state.glasses * GLASS_SIZE);
+          const glassesLeft = Math.ceil(left / GLASS_SIZE);
+
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('💧 Time to drink!', {
+              body: `${glassesLeft} glasses (${left}ml) left. You got this!`
+            });
+          }
+
+          const msg = pickRandom([
+            `⏰ Ding ding! ${time} — time to drink!`,
+            `It's ${time}! You know what that means... DRINK!`,
+            `Clock says ${time}, and I say DRINK UP!`,
+            `${time} already?! Where's your water?`
+          ]);
+          setBotMood('encourage', msg);
+        }
+      }
+    });
+
+    state._lastFiredTimes = (state._lastFiredTimes || []).filter(t => times.includes(t));
+  }
+
+  setInterval(() => {
+    const saved = loadState();
+    if (saved.date !== state.date) {
+      state = saved;
+      lastDrinkTime = state.lastDrinkTime || null;
+      render();
+      return;
+    }
+
+    const d = now();
+    document.getElementById('clockDisplay').textContent = formatTime(d);
+    checkScheduledReminders();
+  }, 1000);
+
+  let insultCheckInterval = setInterval(() => {
+    if (state.glasses < TOTAL_GLASSES) {
+      updateInsultCheck();
+    }
+  }, 15000);
+
+  render();
+  document.getElementById('newReminderTime').value = '12:00';
+
+  if (state.glasses === 0 && parseInt(getCurrentTimeStr().split(':')[0]) >= 10) {
+    setTimeout(() => {
+      if (state.glasses === 0) setBotMood('encourage');
+    }, 3000);
+  }
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
