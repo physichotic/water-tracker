@@ -1,0 +1,21 @@
+{
+  "name": "Water Tracker",
+  "short_name": "Water",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#e8f4f8",
+  "theme_color": "#1a9acf",
+  "scope": ".",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%231a9acf'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='white'%3E%F0%9F%92%A7%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%231a9acf'/%3E%3Ctext x='50' y='68' font-size='54' text-anchor='middle' fill='white'%3E%F0%9F%92%A7%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
